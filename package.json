@@ -1,0 +1,16 @@
+{
+    "name": "my-fullstack-app",
+    "version": "1.0.0",
+    "scripts": {
+        "start:backend": "cd backend && npm run start",
+        "start:frontend": "cd frontend && npm run dev",
+        "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\""
+    },
+    "dependencies": {
+        "concurrently": "^8.0.0"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.0",
+        "@types/multer": "^1.4.12"
+    }
+}

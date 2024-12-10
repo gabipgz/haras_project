@@ -13,6 +13,9 @@ import LoadingOverlay from './LoadingOverlay'
 import ManageHorseForm from './ManageHorseForm'
 import CreateHorseForm from './CreateHorseForm'
 import { Horse } from '../types/Horse'
+import { HomeIcon } from "lucide-react"
+import Header from './Header'
+import HederaLogin from './HederaLogin'
 
 interface Collection {
   tokenId: string;
@@ -98,6 +101,7 @@ export default function VirtualHorseStable() {
         throw new Error('Failed to fetch collections');
       }
       const data = await response.json();
+      console.log('Fetched collections:', data);
       setCollections(data);
     } catch (error) {
       showAlert(error instanceof Error ? error.message : 'Error fetching collections', 'error');
@@ -157,24 +161,12 @@ export default function VirtualHorseStable() {
 
     try {
       setIsLoading('Creating stable...')
-      const response = await fetch(`${API_URL}/collection`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: stableInfo.name,
-          symbol: stableInfo.symbol,
-          description: stableInfo.description
-        })
+      const result = await makeRequest(`${API_URL}/collection`, 'POST', {
+        name: stableInfo.name,
+        symbol: stableInfo.symbol,
+        description: stableInfo.description
       })
 
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to create stable')
-      }
-
-      const result = await response.json()
       showAlert(`Stable created successfully with ID: ${result.id}`, 'success')
       setStableInfo({
         name: '',
@@ -185,7 +177,7 @@ export default function VirtualHorseStable() {
       
       await fetchCollections()
     } catch (error) {
-      showAlert(error instanceof Error ? error.message : 'Error creating stable', 'error')
+      // Error handling is already done in makeRequest
     } finally {
       setIsLoading('')
     }
@@ -387,20 +379,27 @@ export default function VirtualHorseStable() {
     }))
   }
 
+  const handleLogin = () => {
+    // Implement login logic
+    setIsLoggedIn(true)
+  }
+
+  const handleLogout = () => {
+    // Implement logout logic
+    setIsLoggedIn(false)
+  }
+
   if (!isLoggedIn) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Virtual Horse Stable</CardTitle>
-            <CardDescription>Please log in to access your virtual horse stable</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p>You need to connect your Hedera wallet to use this feature.</p>
-          </CardContent>
-        </Card>
+      <div className="container mx-auto px-4 py-8 max-w-md">
+        <HederaLogin onLoginStatusChange={(status) => {
+          setIsLoggedIn(status)
+          if (status) {
+            fetchCollections()
+          }
+        }} />
       </div>
-    );
+    )
   }
 
   if (showManageHorseForm && horseId) {
@@ -561,8 +560,13 @@ export default function VirtualHorseStable() {
               return (
                 <Card key={`${collection.tokenId}-${index}`}>
                   <CardHeader>
-                    <CardTitle>{collection.name}</CardTitle>
-                    <CardDescription>{collection.symbol}</CardDescription>
+                    <div className="flex items-center gap-2">
+                      <HomeIcon className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <CardTitle>{collection.name} ({collection.symbol})</CardTitle>
+                        <CardDescription>{collection.tokenId}</CardDescription>
+                      </div>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <p className="mb-4">{collection.description}</p>

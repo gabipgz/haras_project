@@ -2,9 +2,13 @@
     "name": "my-fullstack-app",
     "version": "1.0.0",
     "scripts": {
+        "build:backend": "cd backend && npm run build",
+        "build:frontend": "cd frontend && npm run build",
+        "build": "npm run build:backend && npm run build:frontend",
         "start:backend": "cd backend && npm run start",
         "start:frontend": "cd frontend && npm run dev",
-        "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\""
+        "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+        "dev": "npm run build && npm run start"
     },
     "dependencies": {
         "concurrently": "^8.0.0"

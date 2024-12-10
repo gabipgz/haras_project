@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
+import { useAuth } from '../context/AuthContext'
 
 interface HederaCredentials {
   accountId: string;
@@ -16,6 +17,7 @@ interface HederaLoginProps {
 }
 
 export default function HederaLogin({ onLoginStatusChange }: HederaLoginProps) {
+  const { setLoginState } = useAuth()
   const [credentials, setCredentials] = useState<HederaCredentials>({
     accountId: '',
     privateKey: ''
@@ -97,6 +99,7 @@ export default function HederaLogin({ onLoginStatusChange }: HederaLoginProps) {
       // If successful, store in localStorage
       localStorage.setItem('hederaCredentials', JSON.stringify(credentials))
       setIsLoggedIn(true)
+      setLoginState(credentials.accountId)
       onLoginStatusChange?.(true)
       showAlert('Successfully logged in', 'success')
     } catch (error) {

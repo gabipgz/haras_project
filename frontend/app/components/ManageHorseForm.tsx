@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Separator } from "@/components/ui/separator"
 import ImageUpload from './ImageUpload'
 import { Horse } from '../types/Horse'
+import HorseGenealogyTree from './HorseGenealogyTree'
 
 interface HorseDetails {
   tokenId: string
@@ -53,6 +54,7 @@ export default function ManageHorseForm({
           throw new Error('Failed to fetch horse details')
         }
         const data = await response.json()
+        console.log('Fetched horse details:', data)
         setHorseDetails(data)
       } catch (error) {
         showAlert(error instanceof Error ? error.message : 'Error fetching horse details', 'error')
@@ -237,6 +239,16 @@ export default function ManageHorseForm({
                 </div>
               </div>
             )}
+
+            {/* Genealogical Tree */}
+            <div className="mt-8 border-t pt-6">
+              <h3 className="font-semibold mb-4">Genealogical Tree</h3>
+              <HorseGenealogyTree
+                horseId={horseId}
+                showAlert={showAlert}
+                setIsLoading={setIsLoading}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -60,9 +60,12 @@ export class HederaService implements OnModuleInit, OnModuleDestroy {
       const accountId = AccountId.fromString(credentials.accountId);
       const privateKey = PrivateKey.fromString(credentials.privateKey);
       
-      this.client = Client.forTestnet();
+      // Use environment variable only for network selection
+      const network = this.configService.get<string>('HEDERA_NETWORK', 'testnet');
+      this.client = network === 'mainnet' ? Client.forMainnet() : Client.forTestnet();
       this.client.setOperator(accountId, privateKey);
-      this.logger.log('Hedera client initialized with provided credentials');
+      
+      this.logger.log(`Hedera client initialized on ${network} network`);
     } catch (error) {
       this.logger.error('Error initializing Hedera client:', error);
       throw error;
@@ -261,9 +264,14 @@ export class HederaService implements OnModuleInit, OnModuleDestroy {
    * @returns A promise that resolves to the created topic ID.
    */
   async createTopic(memo: string): Promise<string> {
+    const credentials = this.credentialsStore.getCredentials();
+    if (!credentials) {
+      throw new Error('No credentials available - please login first');
+    }
+
     const transaction = new TopicCreateTransaction()
-      .setAdminKey(PrivateKey.fromString(this.credentialsStore.getCredentials()?.privateKey || process.env.HEDERA_PRIVATE_KEY))
-      .setSubmitKey(PrivateKey.fromString(this.credentialsStore.getCredentials()?.privateKey || process.env.HEDERA_PRIVATE_KEY))
+      .setAdminKey(PrivateKey.fromString(credentials.privateKey))
+      .setSubmitKey(PrivateKey.fromString(credentials.privateKey))
       .setTopicMemo(memo)
       .setMaxTransactionFee(new Hbar(2));
 
@@ -279,12 +287,17 @@ export class HederaService implements OnModuleInit, OnModuleDestroy {
    * @returns A promise that resolves to the status of the message submission.
    */
   async submitMessage(topicId: string, message: string): Promise<string> {
+    const credentials = this.credentialsStore.getCredentials();
+    if (!credentials) {
+      throw new Error('No credentials available - please login first');
+    }
+
     const transaction = await new TopicMessageSubmitTransaction({
       topicId,
       message,
     }).freezeWith(this.client);
 
-    const signTx = await transaction.sign(PrivateKey.fromString(this.credentialsStore.getCredentials()?.privateKey || process.env.HEDERA_PRIVATE_KEY));
+    const signTx = await transaction.sign(PrivateKey.fromString(credentials.privateKey));
     const txResponse = await signTx.execute(this.client);
     const receipt = await txResponse.getReceipt(this.client);
 

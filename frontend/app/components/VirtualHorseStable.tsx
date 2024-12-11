@@ -13,7 +13,7 @@ import LoadingOverlay from './LoadingOverlay'
 import ManageHorseForm from './ManageHorseForm'
 import CreateHorseForm from './CreateHorseForm'
 import { Horse } from '../types/Horse'
-import { HomeIcon } from "lucide-react"
+import { HomeIcon, ChevronDown, ChevronUp } from "lucide-react"
 import Header from './Header'
 import HederaLogin from './HederaLogin'
 
@@ -84,6 +84,7 @@ export default function VirtualHorseStable() {
   const [showManageHorseForm, setShowManageHorseForm] = useState(false)
   const [additionalHorseImages, setAdditionalHorseImages] = useState<File[]>([])
   const [eventNote, setEventNote] = useState('')
+  const [isStableFormExpanded, setIsStableFormExpanded] = useState(false)
 
   useEffect(() => {
     const credentials = localStorage.getItem('hederaCredentials')
@@ -502,7 +503,7 @@ export default function VirtualHorseStable() {
     <div className="container mx-auto px-4 py-8">
       {isLoading && <LoadingOverlay message={isLoading} />}
 
-      <h1 className="text-3xl font-bold mb-6">Virtual Horse Stable</h1>
+      {/* <h1 className="text-3xl font-bold mb-6">Horse Stable</h1> */}
 
       {alert.message && (
         <Alert variant={alert.type === 'success' ? 'default' : 'destructive'} className="mb-4">
@@ -511,45 +512,59 @@ export default function VirtualHorseStable() {
       )}
 
       <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Create New Stable</CardTitle>
-          <CardDescription>Set up a cozy home for your virtual horses</CardDescription>
+        <CardHeader 
+          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          onClick={() => setIsStableFormExpanded(!isStableFormExpanded)}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Register New Stable</CardTitle>
+              <CardDescription>Register a new stable to manage your horses</CardDescription>
+            </div>
+            {isStableFormExpanded ? (
+              <ChevronUp className="h-5 w-5 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="h-5 w-5 text-muted-foreground" />
+            )}
+          </div>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleCreateStable} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="stableName">Stable Name</Label>
-              <Input
-                id="stableName"
-                placeholder="e.g., Sunnybrook Stables"
-                value={stableInfo.name}
-                onChange={(e) => updateStableInfo('name', e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="stableSymbol">Stable Symbol</Label>
-              <Input
-                id="stableSymbol"
-                placeholder="e.g., SBS"
-                value={stableInfo.symbol}
-                onChange={(e) => updateStableInfo('symbol', e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="stableDescription">Stable Description</Label>
-              <Textarea
-                id="stableDescription"
-                placeholder="Describe your stable..."
-                value={stableInfo.description}
-                onChange={(e) => updateStableInfo('description', e.target.value)}
-                required
-              />
-            </div>
-            <Button type="submit">Create Stable</Button>
-          </form>
-        </CardContent>
+        {isStableFormExpanded && (
+          <CardContent>
+            <form onSubmit={handleCreateStable} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="stableName">Stable Name</Label>
+                <Input
+                  id="stableName"
+                  placeholder="e.g., Sunnybrook Stables"
+                  value={stableInfo.name}
+                  onChange={(e) => updateStableInfo('name', e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="stableSymbol">Stable Symbol</Label>
+                <Input
+                  id="stableSymbol"
+                  placeholder="e.g., SBS"
+                  value={stableInfo.symbol}
+                  onChange={(e) => updateStableInfo('symbol', e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="stableDescription">Stable Description</Label>
+                <Textarea
+                  id="stableDescription"
+                  placeholder="Describe your stable..."
+                  value={stableInfo.description}
+                  onChange={(e) => updateStableInfo('description', e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit">Create Stable</Button>
+            </form>
+          </CardContent>
+        )}
       </Card>
 
       {collections.length > 0 && (

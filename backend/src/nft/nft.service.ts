@@ -162,8 +162,7 @@ export class NFTService {
 
     try {
       const currentInfo = await this.getNFTInfo(nftId);
-      const startTime = new Date(0); // Start from the beginning of time
-      const messages = await this.hederaService.getMessages(currentInfo.metadata.topicId, startTime, 100, 10000);
+      const messages = await this.hederaService.getMessagesFromMirrorNode(currentInfo.metadata.topicId);
 
       this.logger.log(`Retrieved ${messages.length} historical events for NFT: ${nftId}`);
       return messages.map(msg => msg.message);

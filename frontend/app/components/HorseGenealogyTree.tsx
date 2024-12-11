@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 import HorseDetailsModal from './HorseDetailsModal'
+import { ChevronRight } from "lucide-react"
 
 interface HorseNode {
   tokenId: string
@@ -27,168 +28,226 @@ interface HorseNode {
 
 interface HorseGenealogyTreeProps {
   horseId: string
-  level?: number
-  maxLevels?: number
   showAlert: (message: string, type: 'success' | 'error') => void
   setIsLoading: (message: string) => void
 }
 
 const API_URL = 'http://localhost:3001'
 
-export default function HorseGenealogyTree({ 
-  horseId, 
-  level = 0, 
-  maxLevels = 3,
-  showAlert,
-  setIsLoading 
-}: HorseGenealogyTreeProps) {
+// Add new types for better type safety
+type ParentType = 'sire' | 'dam'
+type LoadingState = { [key: string]: boolean }
+
+interface FetchQueueItem {
+  id: string
+  depth: number
+}
+
+export default function HorseGenealogyTree({ horseId, showAlert, setIsLoading }: HorseGenealogyTreeProps) {
+  // Add memoization for performance
   const [horse, setHorse] = useState<HorseNode | null>(null)
-  const [sire, setSire] = useState<HorseNode | null>(null)
-  const [dam, setDam] = useState<HorseNode | null>(null)
   const [selectedHorse, setSelectedHorse] = useState<HorseNode | null>(null)
+  const [parents, setParents] = useState<{ [key: string]: HorseNode }>({})
+  const [fetchedIds, setFetchedIds] = useState<Set<string>>(new Set())
+  const [loadingStates, setLoadingStates] = useState<LoadingState>({})
+  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchHorse = async () => {
+  // Improved queue-based fetching with better error handling and rate limiting
+  const fetchParentsQueue = async (queue: FetchQueueItem[], maxDepth: number = 3) => {
+    const processedIds = new Set<string>()
+    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+    
+    for (const { id, depth } of queue) {
+      if (depth > maxDepth || processedIds.has(id) || fetchedIds.has(id)) continue
+      
       try {
-        if (!horseId || horseId.includes('undefined')) return
-
-        const response = await fetch(`${API_URL}/nft/${horseId}`)
+        setLoadingStates(prev => ({ ...prev, [id]: true }))
+        
+        // Add small delay between requests to prevent rate limiting
+        await delay(100)
+        
+        const response = await fetch(`${API_URL}/nft/${id}`)
         if (!response.ok) {
-          throw new Error('Failed to fetch horse details')
+          throw new Error(`HTTP error! status: ${response.status}`)
         }
+        
         const data = await response.json()
-        setHorse(data)
-
-        // Fetch parents if we haven't reached max levels
-        if (level < maxLevels) {
-          if (data.metadata.pedigree.sireId) {
-            const sireResponse = await fetch(`${API_URL}/nft/${data.metadata.pedigree.sireId}`)
-            if (sireResponse.ok) {
-              const sireData = await sireResponse.json()
-              setSire(sireData)
-            }
-          }
-
-          if (data.metadata.pedigree.damId) {
-            const damResponse = await fetch(`${API_URL}/nft/${data.metadata.pedigree.damId}`)
-            if (damResponse.ok) {
-              const damData = await damResponse.json()
-              setDam(damData)
-            }
-          }
+        processedIds.add(id)
+        
+        setParents(prev => ({ ...prev, [id]: data }))
+        setFetchedIds(prev => new Set(prev).add(id))
+        
+        // Add parents to queue with validation
+        const { sireId, damId } = data.metadata.pedigree
+        if (sireId && typeof sireId === 'string') {
+          queue.push({ id: sireId, depth: depth + 1 })
+        }
+        if (damId && typeof damId === 'string') {
+          queue.push({ id: damId, depth: depth + 1 })
         }
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        console.error(`Error fetching horse ${id}:`, errorMessage)
+        setError(`Failed to fetch ancestor ${id}`)
+        showAlert(`Error fetching ancestor details for ${id}`, 'error')
+      } finally {
+        setLoadingStates(prev => ({ ...prev, [id]: false }))
+      }
+    }
+  }
+
+  // Modify renderHorseCard to remove expand button
+  const renderHorseCard = (horseData: HorseNode, isBaseHorse: boolean = false) => (
+    <Card 
+      className={`w-40 cursor-pointer transition-all ${
+        loadingStates[`${horseData.tokenId}:${horseData.serialNumber}`] 
+          ? 'opacity-50' 
+          : 'hover:shadow-lg'
+      }`}
+      onClick={() => setSelectedHorse(horseData)}
+    >
+      <CardContent className="p-2">
+        <div className="text-center">
+          {horseData.metadata.images && horseData.metadata.images[0] && (
+            <div className="mb-1">
+              <img 
+                src={`https://ipfs.io/ipfs/${horseData.metadata.images[0]}`}
+                alt={horseData.metadata.name}
+                className="w-10 h-10 object-contain rounded-full mx-auto bg-muted"
+              />
+            </div>
+          )}
+          <h4 className="font-semibold text-sm">{horseData.metadata.name}</h4>
+          <p className="text-xs text-muted-foreground">{horseData.metadata.breed}</p>
+          <p className="text-xs text-muted-foreground">{horseData.metadata.sex}</p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+
+  const renderUnknownCard = (name?: string, role?: string) => (
+    <Card className="w-40 mb-4">
+      <CardContent className="p-2">
+        <div className="text-center">
+          <div className="mb-1">
+            <div className="w-10 h-10 bg-muted rounded-full mx-auto flex items-center justify-center">
+              <span className="text-xl text-muted-foreground">?</span>
+            </div>
+          </div>
+          <h4 className="font-semibold text-sm">{name || 'Unknown'}</h4>
+          <p className="text-xs text-muted-foreground">{role || 'Unknown'}</p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+
+  // Improved renderBranch with better type checking
+  const renderBranch = (horseId?: string, horseName?: string, role: ParentType | 'Unknown' = 'Unknown') => {
+    if (!horseId || !parents[horseId]) {
+      return renderUnknownCard(horseName, role)
+    }
+
+    const currentHorse = parents[horseId]
+    const { sireId, damId } = currentHorse.metadata.pedigree
+    
+    return (
+      <div className="flex flex-col items-center">
+        {renderHorseCard(currentHorse)}
+        
+        {(sireId || damId) && (
+          <div className="flex gap-10 mt-16">
+            <div className="flex flex-col items-center">
+              {renderBranch(sireId, currentHorse.metadata.pedigree.sireName, 'sire')}
+            </div>
+            <div className="flex flex-col items-center">
+              {renderBranch(damId, currentHorse.metadata.pedigree.damName, 'dam')}
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // Modify useEffect to fetch all generations at once
+  useEffect(() => {
+    let mounted = true
+    const controller = new AbortController()
+
+    const initializeTree = async () => {
+      if (!horseId || horseId.includes('undefined')) return
+      
+      try {
+        setIsLoading('Loading horse details...')
+        const response = await fetch(`${API_URL}/nft/${horseId}`, {
+          signal: controller.signal
+        })
+        
+        if (!response.ok) throw new Error('Failed to fetch horse details')
+        if (!mounted) return
+        
+        const data = await response.json()
+        setHorse(data)
+        
+        // Initialize all generations
+        const queue: FetchQueueItem[] = []
+        if (data.metadata.pedigree.sireId) {
+          queue.push({ id: data.metadata.pedigree.sireId, depth: 0 })
+        }
+        if (data.metadata.pedigree.damId) {
+          queue.push({ id: data.metadata.pedigree.damId, depth: 0 })
+        }
+        
+        await fetchParentsQueue(queue, 3) // Fetch all generations up to depth 3
+      } catch (error: any) {
+        if (error.name === 'AbortError') return
         console.error('Error fetching horse:', error)
+        showAlert('Error fetching horse details', 'error')
+      } finally {
+        if (mounted) setIsLoading('')
       }
     }
 
-    fetchHorse()
-  }, [horseId, level, maxLevels])
+    initializeTree()
+
+    return () => {
+      mounted = false
+      controller.abort()
+    }
+  }, [horseId])
 
   if (!horse) return null
 
-  const getConnectorStyle = (position: 'left' | 'right') => {
-    const baseStyle = "absolute h-8 border-t-2 border-gray-300 w-8"
-    return position === 'left' 
-      ? `${baseStyle} -left-8 top-1/2` 
-      : `${baseStyle} -right-8 top-1/2`
-  }
-
   return (
-    <div className="relative">
-      <div className="flex justify-center">
-        <Card 
-          className={`w-48 ${level > 0 ? 'mx-4' : 'mx-0'} cursor-pointer hover:shadow-lg transition-shadow`}
-          onClick={() => setSelectedHorse(horse)}
-        >
-          <CardContent className="p-4">
-            <div className="text-center">
-              {horse.metadata.images && horse.metadata.images[0] && (
-                <div className="mb-2">
-                  <img 
-                    src={`https://ipfs.io/ipfs/${horse.metadata.images[0]}`}
-                    alt={horse.metadata.name}
-                    className="w-16 h-16 object-contain rounded-full mx-auto bg-muted"
-                  />
-                </div>
-              )}
-              <h4 className="font-semibold">{horse.metadata.name}</h4>
-              <p className="text-sm text-muted-foreground">{horse.metadata.breed}</p>
-              <p className="text-xs text-muted-foreground">{horse.metadata.sex}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {level < maxLevels && (
-        <div className="mt-8">
-          <div className="flex justify-center gap-32">
-            {/* Sire Branch */}
-            <div className="relative">
-              {horse.metadata.pedigree.sireId && sire ? (
-                <HorseGenealogyTree
-                  horseId={horse.metadata.pedigree.sireId}
-                  level={level + 1}
-                  maxLevels={maxLevels}
-                  showAlert={showAlert}
-                  setIsLoading={setIsLoading}
-                />
-              ) : (
-                horse.metadata.pedigree.sireName && (
-                  <Card className="w-48">
-                    <CardContent className="p-4">
-                      <div className="text-center">
-                        <div className="mb-2">
-                          <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center">
-                            <span className="text-2xl text-muted-foreground">?</span>
-                          </div>
-                        </div>
-                        <h4 className="font-semibold">{horse.metadata.pedigree.sireName}</h4>
-                        <p className="text-sm text-muted-foreground">Sire</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              )}
+    <div className="w-full py-4">
+      <div className="max-w-[900px] mx-auto p-4">
+        <div className="flex flex-col items-center">
+          <div className="relative">
+            {/* Main Horse at the top */}
+            <div className="flex justify-center mb-8">
+              {renderHorseCard(horse, true)}
             </div>
 
-            {/* Dam Branch */}
-            <div className="relative">
-              {horse.metadata.pedigree.damId && dam ? (
-                <HorseGenealogyTree
-                  horseId={horse.metadata.pedigree.damId}
-                  level={level + 1}
-                  maxLevels={maxLevels}
-                  showAlert={showAlert}
-                  setIsLoading={setIsLoading}
-                />
-              ) : (
-                horse.metadata.pedigree.damName && (
-                  <Card className="w-48">
-                    <CardContent className="p-4">
-                      <div className="text-center">
-                        <div className="mb-2">
-                          <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center">
-                            <span className="text-2xl text-muted-foreground">?</span>
-                          </div>
-                        </div>
-                        <h4 className="font-semibold">{horse.metadata.pedigree.damName}</h4>
-                        <p className="text-sm text-muted-foreground">Dam</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              )}
+            {/* Parents Level */}
+            <div className="flex justify-center gap-20">
+              {/* Sire Branch */}
+              <div className="relative">
+                {renderBranch(horse.metadata.pedigree.sireId, horse.metadata.pedigree.sireName, 'sire')}
+              </div>
+
+              {/* Dam Branch */}
+              <div className="relative">
+                {renderBranch(horse.metadata.pedigree.damId, horse.metadata.pedigree.damName, 'dam')}
+              </div>
             </div>
           </div>
         </div>
-      )}
 
-      <HorseDetailsModal
-        horse={selectedHorse}
-        isOpen={!!selectedHorse}
-        onClose={() => setSelectedHorse(null)}
-      />
+        <HorseDetailsModal
+          horse={selectedHorse}
+          isOpen={!!selectedHorse}
+          onClose={() => setSelectedHorse(null)}
+        />
+      </div>
     </div>
   )
 } 

@@ -229,7 +229,7 @@ export class HederaService implements OnModuleInit, OnModuleDestroy {
 
     if (metadata.match(/^0\.0\.\d+$/)) {
       parsedMetadata = await this.getFileContents(metadata);
-      messages = await this.getMessages(parsedMetadata.topicId, new Date(0), 100, 10000);
+      messages = await this.getMessagesFromMirrorNode(parsedMetadata.topicId);
     } else {
       parsedMetadata = this.tryParseJSON(metadata) || { rawMetadata: metadata };
     }
@@ -305,66 +305,28 @@ export class HederaService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Retrieves messages from a specified topic on the Hedera network.
+   * Retrieves messages from a topic using the Mirror Node REST API.
    * @param topicId The ID of the topic to retrieve messages from.
-   * @param startTime The start time for message retrieval.
-   * @param messageCount The maximum number of messages to retrieve.
-   * @param timeout The timeout duration for the retrieval operation.
-   * @returns A promise that resolves to an array of retrieved messages.
+   * @returns A promise that resolves to an array of messages.
    */
-  async getMessages(topicId: string, startTime: Date, messageCount: number, timeout: number): Promise<Array<{ message: string }>> {
-    return new Promise<Array<{ message: string }>>((resolve, reject) => {
-      const messages = [];
-      const topicIdObj = TopicId.fromString(topicId);
-      this.logger.log(`Fetching messages for topic ${topicId}`);
+  public async getMessagesFromMirrorNode(topicId: string): Promise<Array<{ message: string }>> {
+    const network = this.configService.get<string>('HEDERA_NETWORK', 'testnet');
+    const baseUrl = network === 'mainnet' 
+      ? 'https://mainnet-public.mirrornode.hedera.com' 
+      : 'https://testnet.mirrornode.hedera.com';
+      
+    const response = await fetch(
+      `${baseUrl}/api/v1/topics/${topicId}/messages?limit=25&order=desc`
+    );
+    
+    if (!response.ok) {
+      this.logger.warn(`Failed to fetch messages from Mirror Node for topic ${topicId}`);
+      return [];
+    }
 
-      const attemptSubscription = (attempt = 0) => {
-        let subscription;
-        try {
-          subscription = new TopicMessageQuery()
-            .setTopicId(topicIdObj)
-            .setStartTime(startTime)
-            .subscribe(
-              this.client,
-              (error) => {
-                if (error) {
-                  this.logger.error(`Subscription error (attempt ${attempt}): ${error}`);
-                  if (subscription) subscription.unsubscribe();
-                  if (attempt < 3) {
-                    setTimeout(() => attemptSubscription(attempt + 1), 1000 * (attempt + 1));
-                  } else {
-                    reject(new Error(`Failed to subscribe after ${attempt} attempts: ${error}`));
-                  }
-                }
-              },
-              (message) => {
-                try {
-                  const parsedMessage = JSON.parse(Buffer.from(message.contents).toString("utf8"));
-                  messages.push(parsedMessage);
-                  if (messages.length >= messageCount) {
-                    if (subscription) subscription.unsubscribe();
-                    resolve(messages);
-                  }
-                } catch (parseError) {
-                  this.logger.error(`Error parsing message: ${parseError}`);
-                }
-              }
-            );
-        } catch (setupError) {
-          this.logger.error(`Error setting up subscription (attempt ${attempt}): ${setupError}`);
-          if (attempt < 3) {
-            setTimeout(() => attemptSubscription(attempt + 1), 1000 * (attempt + 1));
-          } else {
-            reject(new Error(`Failed to set up subscription after ${attempt} attempts: ${setupError}`));
-          }
-        }
-      };
-
-      attemptSubscription();
-
-      setTimeout(() => {
-        resolve(messages);
-      }, timeout);
-    });
+    const data = await response.json();
+    return data.messages?.map(msg => ({
+      message: JSON.parse(Buffer.from(msg.message, 'base64').toString())
+    })) || [];
   }
 }

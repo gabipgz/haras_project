@@ -1,7 +1,6 @@
 import { Controller, Post, Get, Param, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { IpfsService } from './ipfs.service';
-
 @Controller('ipfs')
 export class IpfsController {
   constructor(private readonly ipfsService: IpfsService) {}

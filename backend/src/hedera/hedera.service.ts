@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Client, AccountId, PrivateKey, TokenCreateTransaction, TokenType, TokenSupplyType, TokenMintTransaction, TokenInfoQuery, TokenNftInfoQuery, NftId, TokenId, FileCreateTransaction, FileContentsQuery, TopicCreateTransaction, TopicMessageSubmitTransaction, TopicMessageQuery, Hbar, TopicId } from "@hashgraph/sdk";
 import { CredentialsStoreService } from './credentials-store.service';
 import { Collection } from 'src/models/collection.model';
+import { Long } from '@hashgraph/sdk';
 
 @Injectable()
 export class HederaService implements OnModuleInit, OnModuleDestroy {
@@ -41,11 +42,14 @@ export class HederaService implements OnModuleInit, OnModuleDestroy {
    */
   private async initializeClient() {
     const credentials = this.credentialsStore.getCredentials();
-    const operatorId = credentials?.accountId || this.configService.get<string>('HEDERA_ACCOUNT_ID');
-    const operatorKey = credentials?.privateKey || this.configService.get<string>('HEDERA_PRIVATE_KEY');
 
-    if (!operatorId || !operatorKey) {
-      throw new Error('Hedera credentials not provided');
+    if (!credentials) {
+      // When no credentials are stored, don't initialize the client
+      if (this.client) {
+        await this.client.close();
+        this.client = null;
+      }
+      return;
     }
 
     try {
@@ -53,9 +57,11 @@ export class HederaService implements OnModuleInit, OnModuleDestroy {
         await this.client.close();
       }
 
-      const accountId = AccountId.fromString(operatorId);
+      const accountId = AccountId.fromString(credentials.accountId);
+      const privateKey = PrivateKey.fromString(credentials.privateKey);
+      
       this.client = Client.forTestnet();
-      this.client.setOperator(accountId, operatorKey);
+      this.client.setOperator(accountId, privateKey);
       this.logger.log('Hedera client initialized with provided credentials');
     } catch (error) {
       this.logger.error('Error initializing Hedera client:', error);
@@ -202,7 +208,10 @@ export class HederaService implements OnModuleInit, OnModuleDestroy {
    * @returns A promise that resolves to an object containing NFT information.
    */
   async getNFTInfo(tokenId: string, serialNumber: string): Promise<any> {
-    const nftId = new NftId(TokenId.fromString(tokenId), serialNumber);
+    const nftId = new NftId(
+      TokenId.fromString(tokenId), 
+      Long.fromString(serialNumber)
+    );
     const nftInfo = await new TokenNftInfoQuery()
       .setNftId(nftId)
       .execute(this.client);

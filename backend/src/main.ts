@@ -1,21 +1,20 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
-
-import * as dotenv from 'dotenv';
-import * as path from 'path';
-
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.useGlobalPipes(new ValidationPipe());
-  app.useStaticAssets(join(__dirname, '..', 'public'));
-  app.enableCors();
-  const port = process.env.PORT || 3001;
+  const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+  
+  // CORS configuration
+  app.enableCors({
+    origin: configService.get('CORS_ORIGIN'),
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
+
+  const port = configService.get('PORT', 3001);
   await app.listen(port);
-  console.log(`Application is running on: http://localhost:${port}`);
+  console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();

@@ -16,6 +16,7 @@ interface HorseDetails {
   owner: string
   metadata: Horse
   messages: Array<{
+    message: any
     name: string
     description: string
     images?: string[]
@@ -152,54 +153,110 @@ export default function ManageHorseForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Basic Information */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <h3 className="font-semibold mb-2">Basic Information</h3>
-                <p>Breed: {horseDetails.metadata.breed}</p>
-                <p>Birth Date: {new Date(horseDetails.metadata.birthDate).toLocaleDateString()}</p>
-                <p>Sex: {horseDetails.metadata.sex}</p>
-                <p>Coat Color: {horseDetails.metadata.coatColor}</p>
-                <p>Weight: {horseDetails.metadata.weight}</p>
-                <p>Height: {horseDetails.metadata.height}</p>
-                <p>Registration: {horseDetails.metadata.registrationOrganization}</p>
+                <h3 className="text-lg font-semibold mb-4 text-primary">Basic Information</h3>
+                <dl className="space-y-2">
+                  <div className="flex items-baseline">
+                    <dt className="w-32 text-sm font-medium text-muted-foreground">Breed:</dt>
+                    <dd className="text-sm">{horseDetails.metadata.breed}</dd>
+                  </div>
+                  <div className="flex items-baseline">
+                    <dt className="w-32 text-sm font-medium text-muted-foreground">Birth Date:</dt>
+                    <dd className="text-sm">{new Date(horseDetails.metadata.birthDate).toLocaleDateString()}</dd>
+                  </div>
+                  <div className="flex items-baseline">
+                    <dt className="w-32 text-sm font-medium text-muted-foreground">Sex:</dt>
+                    <dd className="text-sm">{horseDetails.metadata.sex}</dd>
+                  </div>
+                  <div className="flex items-baseline">
+                    <dt className="w-32 text-sm font-medium text-muted-foreground">Coat Color:</dt>
+                    <dd className="text-sm">{horseDetails.metadata.coatColor}</dd>
+                  </div>
+                  <div className="flex items-baseline">
+                    <dt className="w-32 text-sm font-medium text-muted-foreground">Weight:</dt>
+                    <dd className="text-sm">{horseDetails.metadata.weight}</dd>
+                  </div>
+                  <div className="flex items-baseline">
+                    <dt className="w-32 text-sm font-medium text-muted-foreground">Height:</dt>
+                    <dd className="text-sm">{horseDetails.metadata.height}</dd>
+                  </div>
+                  <div className="flex items-baseline">
+                    <dt className="w-32 text-sm font-medium text-muted-foreground">Registration:</dt>
+                    <dd className="text-sm">{horseDetails.metadata.registrationOrganization}</dd>
+                  </div>
+                </dl>
               </div>
 
               {/* Pedigree Information */}
               <div>
-                <h3 className="font-semibold mb-2">Pedigree</h3>
-                <p>Sire ID: {horseDetails.metadata.pedigree.sireId || 'N/A'}</p>
-                <p>Sire Name: {horseDetails.metadata.pedigree.sireName || 'N/A'}</p>
-                <p>Dam ID: {horseDetails.metadata.pedigree.damId || 'N/A'}</p>
-                <p>Dam Name: {horseDetails.metadata.pedigree.damName || 'N/A'}</p>
+                <h3 className="text-lg font-semibold mb-4 text-primary">Pedigree</h3>
+                <dl className="space-y-2">
+                  <div className="flex items-baseline">
+                    <dt className="w-32 text-sm font-medium text-muted-foreground">Sire ID:</dt>
+                    <dd className="text-sm">{horseDetails.metadata.pedigree.sireId || 'N/A'}</dd>
+                  </div>
+                  <div className="flex items-baseline">
+                    <dt className="w-32 text-sm font-medium text-muted-foreground">Sire Name:</dt>
+                    <dd className="text-sm">{horseDetails.metadata.pedigree.sireName || 'N/A'}</dd>
+                  </div>
+                  <div className="flex items-baseline">
+                    <dt className="w-32 text-sm font-medium text-muted-foreground">Dam ID:</dt>
+                    <dd className="text-sm">{horseDetails.metadata.pedigree.damId || 'N/A'}</dd>
+                  </div>
+                  <div className="flex items-baseline">
+                    <dt className="w-32 text-sm font-medium text-muted-foreground">Dam Name:</dt>
+                    <dd className="text-sm">{horseDetails.metadata.pedigree.damName || 'N/A'}</dd>
+                  </div>
+                </dl>
               </div>
             </div>
 
             {/* Health Information */}
             <div>
-              <h3 className="font-semibold mb-2">Health Information</h3>
-              <p>Known Allergies: {horseDetails.metadata.knownAllergies || 'None'}</p>
-              <p>Health Conditions: {horseDetails.metadata.knownHealthConditions || 'None'}</p>
-              <p>Last Negative Coggins Test: {
-                horseDetails.metadata.lastNegativeCogginsTest ? 
-                new Date(horseDetails.metadata.lastNegativeCogginsTest).toLocaleDateString() : 
-                'N/A'
-              }</p>
+              <h3 className="text-lg font-semibold mb-4 text-primary">Health Information</h3>
+              <dl className="space-y-2">
+                <div className="flex items-baseline">
+                  <dt className="w-32 text-sm font-medium text-muted-foreground">Allergies:</dt>
+                  <dd className="text-sm">{horseDetails.metadata.knownAllergies || 'None'}</dd>
+                </div>
+                <div className="flex items-baseline">
+                  <dt className="w-32 text-sm font-medium text-muted-foreground">Conditions:</dt>
+                  <dd className="text-sm">{horseDetails.metadata.knownHealthConditions || 'None'}</dd>
+                </div>
+                <div className="flex items-baseline">
+                  <dt className="w-32 text-sm font-medium text-muted-foreground">Last Coggins:</dt>
+                  <dd className="text-sm">
+                    {horseDetails.metadata.lastNegativeCogginsTest ? 
+                      new Date(horseDetails.metadata.lastNegativeCogginsTest).toLocaleDateString() : 
+                      'N/A'}
+                  </dd>
+                </div>
+              </dl>
             </div>
 
             {/* Medical History */}
             {horseDetails.metadata.medicalHistory.length > 0 && (
               <div>
-                <h3 className="font-semibold mb-2">Medical History</h3>
-                <div className="space-y-2">
+                <h3 className="text-lg font-semibold mb-4 text-primary">Medical History</h3>
+                <div className="space-y-4">
                   {horseDetails.metadata.medicalHistory.map((record, index) => (
-                    <div key={index} className="border p-2 rounded">
-                      <p>Date: {new Date(record.date).toLocaleDateString()}</p>
-                      <p>Type: {record.type}</p>
-                      <p>Description: {record.description}</p>
-                      <p>Veterinarian: {record.veterinarian}</p>
-                      {record.observations && <p>Observations: {record.observations}</p>}
+                    <div key={index} className="border-l-2 border-primary/20 pl-4">
+                      <div className="text-sm text-muted-foreground">
+                        {new Date(record.date).toLocaleDateString()}
+                      </div>
+                      <div className="font-medium mt-1">{record.type}</div>
+                      <div className="text-sm mt-1">{record.description}</div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        Veterinarian: {record.veterinarian}
+                      </div>
+                      {record.observations && (
+                        <div className="text-sm mt-1 italic">
+                          {record.observations}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -209,14 +266,20 @@ export default function ManageHorseForm({
             {/* Competitions */}
             {horseDetails.metadata.competitions && horseDetails.metadata.competitions.length > 0 && (
               <div>
-                <h3 className="font-semibold mb-2">Competition History</h3>
-                <div className="space-y-2">
+                <h3 className="text-lg font-semibold mb-4 text-primary">Competition History</h3>
+                <div className="space-y-4">
                   {horseDetails.metadata.competitions.map((competition, index) => (
-                    <div key={index} className="border p-2 rounded">
-                      <p>Date: {new Date(competition.date).toLocaleDateString()}</p>
-                      <p>Name: {competition.name}</p>
-                      <p>Result: {competition.result}</p>
-                      {competition.award && <p>Award: {competition.award}</p>}
+                    <div key={index} className="border-l-2 border-primary/20 pl-4">
+                      <div className="text-sm text-muted-foreground">
+                        {new Date(competition.date).toLocaleDateString()}
+                      </div>
+                      <div className="font-medium mt-1">{competition.name}</div>
+                      <div className="text-sm mt-1">Result: {competition.result}</div>
+                      {competition.award && (
+                        <div className="text-sm text-primary mt-1">
+                          Award: {competition.award}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -233,7 +296,7 @@ export default function ManageHorseForm({
                       key={index}
                       src={`https://ipfs.io/ipfs/${cid}`}
                       alt={`${horseDetails.metadata.name} - Image ${index + 1}`}
-                      className="w-full h-48 object-cover rounded-md"
+                      className="w-full h-48 object-contain rounded-md bg-gray-100"
                     />
                   ))}
                 </div>
@@ -261,30 +324,50 @@ export default function ManageHorseForm({
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {horseDetails.messages.map((message, index) => (
-                <div key={index} className="space-y-4">
-                  {index > 0 && <Separator className="my-4" />}
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(message.timestamp).toLocaleString()}
-                    </p>
-                    <h4 className="font-semibold mt-1">{message.name}</h4>
-                    <p className="mt-1">{message.description}</p>
-                  </div>
-                  {message.images && message.images.length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {message.images.map((cid, imgIndex) => (
-                        <img 
-                          key={imgIndex}
-                          src={`https://ipfs.io/ipfs/${cid}`}
-                          alt={`Update ${index + 1} - Image ${imgIndex + 1}`}
-                          className="w-full h-48 object-cover rounded-md"
-                        />
-                      ))}
+              {horseDetails.messages.map((messageWrapper, index) => {
+                const message = messageWrapper.message;
+                return (
+                  <div key={index} className="space-y-4">
+                    {index > 0 && <Separator className="my-4" />}
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-1 bg-primary/10 text-primary rounded-md text-sm">
+                          {message.eventType}
+                        </span>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(message.timestamp).toLocaleString()}
+                        </p>
+                      </div>
+                      <h4 className="font-semibold mt-2">{message.name}</h4>
+                      <p className="mt-1 text-sm">{message.description}</p>
+                      {message.data && (
+                        <div className="mt-2 p-3 bg-muted/50 rounded-md">
+                          <div className="text-sm space-y-1">
+                            {Object.entries(message.data).map(([key, value]) => (
+                              <div key={key} className="flex">
+                                <span className="font-medium w-24">{key}:</span>
+                                <span>{String(value)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              ))}
+                    {message.images && message.images.length > 0 && (
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {message.images.map((cid: string, imgIndex: number) => (
+                          <img 
+                            key={imgIndex}
+                            src={`https://ipfs.io/ipfs/${cid}`}
+                            alt={`Update ${index + 1} - Image ${imgIndex + 1}`}
+                            className="w-full h-48 object-cover rounded-md"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>

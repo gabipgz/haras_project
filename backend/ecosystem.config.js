@@ -8,6 +8,7 @@ module.exports = {
     restart_delay: 1000,
     env: {
       NODE_ENV: "production",
+      PORT: 3001,
       EXTERNAL_HOST: "true"
     }
   }]

@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { useAuth } from '../context/AuthContext'
+import { getApiUrl } from '../../config/api'
 
 interface HederaCredentials {
   accountId: string;
@@ -25,6 +26,8 @@ export default function HederaLogin({ onLoginStatusChange }: HederaLoginProps) {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [alert, setAlert] = useState({ message: '', type: '' as 'success' | 'error' })
 
+  const API_URL = getApiUrl()
+
   useEffect(() => {
     // Check if credentials exist in local storage on component mount
     const storedCredentials = localStorage.getItem('hederaCredentials')
@@ -33,7 +36,7 @@ export default function HederaLogin({ onLoginStatusChange }: HederaLoginProps) {
       setCredentials(parsedCredentials)
       
       // Initialize backend with stored credentials
-      fetch(`http://localhost:3001/auth/login`, {
+      fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +87,7 @@ export default function HederaLogin({ onLoginStatusChange }: HederaLoginProps) {
 
     try {
       // First, call the backend login endpoint
-      const response = await fetch(`http://localhost:3001/auth/login`, {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +112,7 @@ export default function HederaLogin({ onLoginStatusChange }: HederaLoginProps) {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/auth/logout`, {
+      const response = await fetch(`${API_URL}/auth/logout`, {
         method: 'POST',
       });
 

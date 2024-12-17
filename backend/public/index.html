@@ -108,7 +108,9 @@
     <div id="alertContainer"></div>
 
     <script>
-        const API_URL = 'http://localhost:3001';
+        const API_URL = window.location.hostname === 'localhost' 
+          ? 'http://localhost:3001' 
+          : 'http://34.56.65.192:3001';
 
         function showLoader(formId) {
             const form = document.getElementById(formId);

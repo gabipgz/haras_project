@@ -16,6 +16,7 @@ import { Horse } from '../types/Horse'
 import { HomeIcon, ChevronDown, ChevronUp } from "lucide-react"
 import Header from './Header'
 import HederaLogin from './HederaLogin'
+import { getApiUrl } from '../../config/api'
 
 interface Collection {
   tokenId: string;
@@ -25,7 +26,7 @@ interface Collection {
   createdAt: Date;
 }
 
-const API_URL = 'http://localhost:3001'
+const API_URL = getApiUrl()
 
 export default function VirtualHorseStable() {
   const [stableInfo, setStableInfo] = useState<{
@@ -469,14 +470,17 @@ export default function VirtualHorseStable() {
               <CardContent>
                 <p className="mb-4">{horse.metadata.description}</p>
                 {horse.metadata.images && horse.metadata.images.length > 0 && (
-                  <div className="space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 justify-items-center">
                     {horse.metadata.images.map((cid: any, imgIndex: number) => (
-                      <img 
-                        key={imgIndex}
-                        src={`https://ipfs.io/ipfs/${cid}`}
-                        alt={`${horse.metadata.name} - Image ${imgIndex + 1}`}
-                        className="w-full h-48 object-cover rounded-md"
-                      />
+                      <div className="w-fit max-w-full">
+                        <img 
+                          key={imgIndex}
+                          src={`https://ipfs.io/ipfs/${cid}`}
+                          alt={`${horse.metadata.name} - Image ${imgIndex + 1}`}
+                          className="h-48 md:h-64 lg:h-72 object-contain rounded-md"
+                          style={{ aspectRatio: '16/9' }}
+                        />
+                      </div>
                     ))}
                   </div>
                 )}

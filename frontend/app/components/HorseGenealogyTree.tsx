@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 import HorseDetailsModal from './HorseDetailsModal'
 import { ChevronRight } from "lucide-react"
-
+import { getApiUrl } from '../../config/api'
 interface HorseNode {
   tokenId: string
   serialNumber: string
@@ -32,7 +32,7 @@ interface HorseGenealogyTreeProps {
   setIsLoading: (message: string) => void
 }
 
-const API_URL = 'http://localhost:3001'
+const API_URL = getApiUrl()
 
 // Add new types for better type safety
 type ParentType = 'sire' | 'dam'

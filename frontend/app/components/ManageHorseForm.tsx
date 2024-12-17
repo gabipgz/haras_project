@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator"
 import ImageUpload from './ImageUpload'
 import { Horse } from '../types/Horse'
 import HorseGenealogyTree from './HorseGenealogyTree'
+import { getApiUrl } from '../../config/api'
 
 interface HorseDetails {
   tokenId: string
@@ -33,7 +34,7 @@ interface ManageHorseFormProps {
   setIsLoading: (message: string) => void
 }
 
-const API_URL = 'http://localhost:3001'
+const API_URL = getApiUrl()
 
 export default function ManageHorseForm({ 
   horseId, 

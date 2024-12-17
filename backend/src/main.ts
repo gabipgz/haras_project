@@ -13,9 +13,23 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useGlobalPipes(new ValidationPipe());
   app.useStaticAssets(join(__dirname, '..', 'public'));
-  app.enableCors();
+  
+  // CORS configuration
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
+
   const port = process.env.PORT || 3001;
-  await app.listen(port);
-  console.log(`Application is running on: http://localhost:${port}`);
+  const isExternalHost = process.env.EXTERNAL_HOST === 'true';
+  
+  if (isExternalHost) {
+    await app.listen(port, '0.0.0.0');
+    console.log(`Application is running on: http://34.56.65.192:${port}`);
+  } else {
+    await app.listen(port);
+    console.log(`Application is running on: http://localhost:${port}`);
+  }
 }
 bootstrap();

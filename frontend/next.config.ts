@@ -14,7 +14,6 @@ const nextConfig: NextConfig = {
   publicRuntimeConfig: {
     API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
-  swcMinify: true,
   poweredByHeader: false
 };
 

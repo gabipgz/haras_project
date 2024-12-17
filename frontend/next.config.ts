@@ -5,11 +5,16 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
-  server: {
-    host: '0.0.0.0',
-  },
   publicRuntimeConfig: {
     API_URL: process.env.NEXT_PUBLIC_API_URL,
+  },
+  experimental: {
+    serverComponentsExternalPackages: [],
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+    }
+    return config;
   }
 };
 

@@ -8,11 +8,9 @@ const nextConfig: NextConfig = {
   publicRuntimeConfig: {
     API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
-  experimental: {
-    serverComponentsExternalPackages: [],
-  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
+      // Configurações específicas do cliente se necessário
     }
     return config;
   }

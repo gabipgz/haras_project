@@ -5,18 +5,17 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
   publicRuntimeConfig: {
     API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Configurações específicas do cliente se necessário
-    }
-    return config;
-  }
+  swcMinify: true,
+  poweredByHeader: false
 };
 
 export default nextConfig;

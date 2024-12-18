@@ -70,9 +70,24 @@ cd haras-project
 ### 3. Environment Setup
 Create `.env` files for configuration:
 ```bash
-cp .env.example .env
+cp .env.example backend/.env
 cp frontend/.env.example frontend/.env.local
-cp backend/.env.example backend/.env
+```
+
+The `.env` file for the backend should include the following:
+```env
+HEDERA_NETWORK=testnet
+PORT=3001
+NODE_ENV=development
+PINATA_API_KEY=[YOUR_API_KEY]
+PINATA_SECRET_KEY=[YOUR_SECRET_KEY]
+```
+
+The `.env.local` file for the frontend should include the following:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_SKIP_TYPESCRIPT_CHECK=true
+NEXT_SKIP_LINT=true
 ```
 
 ### 4. Install Dependencies

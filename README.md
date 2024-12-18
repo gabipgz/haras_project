@@ -1,33 +1,39 @@
 # Haras: Blockchain-Based Horse Management System
 
-Haras is a comprehensive platform that revolutionizes horse management by leveraging hashgraph technology. Built on Hedera Hashgraph, it provides a secure, transparent, and efficient way to manage horse records, from medical history to lineage and competition achievements.
+Haras revolutionizes horse management by leveraging Hedera Hashgraph. It provides a secure, transparent, and efficient platform to manage horse records, including medical history, lineage, and competition achievements.
 
-## Overview
+---
 
-Haras utilizes Hedera Hashgraph's powerful features to deliver:
-- **Immutable Records**: Secure storage of medical records, competition history, and genealogical data
-- **Dynamic NFTs**: Representing horses with updateable metadata
-- **Lineage Tracking**: Verifiable pedigree information
-- **Event Management**: Track and verify competition results and achievements
+## 🚀 Overview
 
-## Key Features
+Haras harnesses the power of Hedera Hashgraph to deliver:
+- **Immutable Records**: Secure storage for medical, competition, and genealogical data.
+- **Dynamic NFTs**: Horses represented as NFTs with updateable metadata.
+- **Lineage Tracking**: Verifiable and accurate pedigree information.
+- **Event Management**: Reliable tracking of competition results.
+
+---
+
+## 🔑 Key Features
 
 ### Horse Management
-- **Digital Profiles**: Comprehensive horse information management
-- **Medical Records**: Secure storage of veterinary records and treatments
-- **Competition History**: Track achievements and performance
-- **Lineage Records**: Maintain accurate breeding and pedigree information
+- **Digital Profiles**: Centralized horse information management.
+- **Medical Records**: Immutable storage for veterinary data and treatments.
+- **Competition History**: Track achievements and performance.
+- **Lineage Records**: Maintain accurate breeding and pedigree details.
 
 ### Hashgraph Integration
-- **NFT Creation**: Each horse is represented as a unique NFT
-- **Dynamic Updates**: Real-time updates to horse information
-- **Verifiable History**: All changes are tracked on the chain
+- **NFT Representation**: Each horse assigned a unique, dynamic NFT.
+- **Real-Time Updates**: Instantly update horse information on the chain.
+- **Verifiable Data**: Immutable history of all record changes.
 
-## Technology Stack
+---
+
+## 🛠️ Technology Stack
 
 ### Frontend
-- **Framework**: Next.js 15.0.0
-- **UI Components**: Radix UI, Shadcn UI
+- **Framework**: Next.js (v15.0.0)
+- **UI Libraries**: Radix UI, Shadcn UI
 - **Styling**: Tailwind CSS
 - **Language**: TypeScript
 
@@ -42,58 +48,55 @@ Haras utilizes Hedera Hashgraph's powerful features to deliver:
 ### Infrastructure
 - **Cloud**: Google Cloud Platform
 - **Process Manager**: PM2
-- **Environment**: dotenv
+- **Environment Management**: dotenv
 
-## Local Development Setup
+---
 
-1. **Prerequisites**
+## 🖥️ Local Development Setup
 
+### 1. Prerequisites
+- Install Node.js (v18 or higher).
+- Install PM2 globally:
+  ```bash
+  npm install -g pm2
+  ```
+
+### 2. Clone the Repository
 ```bash
-    Install Node.js (v18 or higher)
-    Install PM2 globally
-    npm install -g pm2
+git clone https://github.com/your-username/haras-project.git
+cd haras-project
 ```
 
-2. **Clone the Repository**
-
+### 3. Environment Setup
+Create `.env` files for configuration:
 ```bash
-    git clone https://github.com/your-username/haras-project.git
-    cd haras-project
+cp .env.example .env
+cp frontend/.env.example frontend/.env.local
+cp backend/.env.example backend/.env
 ```
 
-3. **Environment Setup**
-
+### 4. Install Dependencies
+Install all project dependencies:
 ```bash
-    Create .env files
-    cp .env.example .env
-    cp frontend/.env.example frontend/.env.local
-    cp backend/.env.example backend/.env
+npm install
 ```
 
-4. **Install Dependencies**
-
+### 5. Run in Development Mode
+Run both frontend and backend:
 ```bash
-    Install all dependencies (frontend and backend)
-    npm install
+npm run dev
+```
+Or run them separately:
+```bash
+npm run dev:frontend
+npm run dev:backend
 ```
 
-5. **Development Mode**
-
+### 6. Build for Production
+Build and start production services:
 ```bash
-    Run both frontend and backend in development mode
-    npm run dev
-    Or run separately
-    npm run dev:frontend
-    npm run dev:backend
+npm run build
+npm run production:start
 ```
 
-6. **Production Build**
-
-```bash
-    Build both applications
-    npm run build
-
-    Start production services
-    npm run production:start
-```
-
+---

@@ -63,15 +63,15 @@ Haras harnesses the power of Hedera Hashgraph to deliver:
 
 ### 2. Clone the Repository
 ```bash
-git clone https://github.com/your-username/haras-project.git
-cd haras-project
+git clone https://github.com/gabipgz/haras_project.git
+cd haras_project
 ```
 
 ### 3. Environment Setup
 Create `.env` files for configuration:
 ```bash
-cp .env.example backend/.env
-cp frontend/.env.example frontend/.env.local
+touch backend/.env
+touch frontend/.env.local
 ```
 
 The `.env` file for the backend should include the following:
@@ -94,6 +94,12 @@ NEXT_SKIP_LINT=true
 Install all project dependencies:
 ```bash
 npm install
+cd backend/
+npm install
+cd ..
+cd frontend/
+npm install
+cd ..
 ```
 
 ### 5. Run in Development Mode
@@ -107,11 +113,9 @@ npm run dev:frontend
 npm run dev:backend
 ```
 
-### 6. Build for Production
-Build and start production services:
-```bash
-npm run build
-npm run production:start
+### 6. Access the Application
+Open your browser and navigate to:
 ```
-
+http://localhost:3000/
+```
 ---
